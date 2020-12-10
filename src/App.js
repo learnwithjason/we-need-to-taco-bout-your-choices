@@ -56,6 +56,7 @@ function App() {
   const [responses, setResponses] = useState([]);
   const [activeTaco, setActiveTaco] = useState(0);
   const [tastiness, setTastiness] = useState(3);
+  const [isDone, setIsDone] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -73,6 +74,8 @@ function App() {
     setResponses(newResponses);
 
     if (activeTaco === tacos.length - 1) {
+      setIsDone(true);
+
       await fetch('/.netlify/functions/hasura-add-response', {
         method: 'POST',
         body: JSON.stringify({ responses: newResponses }),
@@ -93,40 +96,50 @@ function App() {
         <h1>We Need to Taco 'Bout Your Choices</h1>
       </header>
       <main>
-        <div className="current-vote">
-          {/* 
+        {isDone ? (
+          <div className="results">
+            <h2>
+              <marquee>Thank you for voting!</marquee>
+            </h2>
+            <p>Emma and Jason will return in...</p>
+            <h3>Tacos and Graphs, the Final Showdown</h3>
+          </div>
+        ) : (
+          <div className="current-vote">
+            {/* 
           1. image
           2. form
             - question heading
             - yes
             - no
            */}
-          <img src={taco.src} alt={taco.alt} />
-          <form onSubmit={handleSubmit}>
-            <h2>How delicious is this taco?</h2>
-            <label htmlFor="amount">
-              Choose 1 for "garbage" and 5 for "I would die for this taco"
-            </label>
-            <input
-              id="amount"
-              type="range"
-              min={1}
-              max={5}
-              onChange={(event) => setTastiness(parseInt(event.target.value))}
-              value={tastiness}
-              list="tickmarks"
-            />
-            <datalist id="tickmarks">
-              <option value={1} label="1"></option>
-              <option value={2}></option>
-              <option value={3} label="3"></option>
-              <option value={4}></option>
-              <option value={5} label="5"></option>
-            </datalist>
+            <img src={taco.src} alt={taco.alt} />
+            <form onSubmit={handleSubmit}>
+              <h2>How delicious is this taco?</h2>
+              <label htmlFor="amount">
+                Choose 1 for "garbage" and 5 for "I would die for this taco"
+              </label>
+              <input
+                id="amount"
+                type="range"
+                min={1}
+                max={5}
+                onChange={(event) => setTastiness(parseInt(event.target.value))}
+                value={tastiness}
+                list="tickmarks"
+              />
+              <datalist id="tickmarks">
+                <option value={1} label="1"></option>
+                <option value={2}></option>
+                <option value={3} label="3"></option>
+                <option value={4}></option>
+                <option value={5} label="5"></option>
+              </datalist>
 
-            <button>Save and Rate the Next Taco</button>
-          </form>
-        </div>
+              <button>Save and Rate the Next Taco</button>
+            </form>
+          </div>
+        )}
       </main>
     </div>
   );
