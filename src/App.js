@@ -57,23 +57,26 @@ function App() {
   const [activeTaco, setActiveTaco] = useState(0);
   const [tastiness, setTastiness] = useState(3);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const taco = tacos[activeTaco];
     const newResponses = [
       ...responses,
-      { tacoId: taco.tacoId, tastiness, isTacoBell: taco.isTacoBell },
+      {
+        tacoId: taco.tacoId,
+        tastinessScore: tastiness,
+        isTacoBell: taco.isTacoBell,
+      },
     ];
 
     setResponses(newResponses);
 
     if (activeTaco === tacos.length - 1) {
-      // TODO implement submission
-      console.log(
-        'saving your responses... FOR SCIENCE (and bragging rights)!',
-      );
-      console.log(newResponses);
+      await fetch('/.netlify/functions/hasura-add-response', {
+        method: 'POST',
+        body: JSON.stringify({ responses: newResponses }),
+      });
 
       return;
     }
