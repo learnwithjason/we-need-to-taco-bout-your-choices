@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSubscription } from 'urql';
 import './App.css';
 
 const tacos = [
@@ -57,6 +58,58 @@ function App() {
   const [activeTaco, setActiveTaco] = useState(0);
   const [tastiness, setTastiness] = useState(3);
   const [isDone, setIsDone] = useState(false);
+  const [scores, setScores] = useState({ tacoBell: 0, notTacoBell: 0 });
+
+  const [result] = useSubscription({
+    query: `
+      subscription MyQuery {
+        tacoVotes {
+          isTacoBell
+          tacoId
+          tastinessScore
+        }
+      }
+    `,
+  });
+
+  useEffect(() => {
+    console.log('new tacos!');
+
+    const votes = result?.data?.tacoVotes || [];
+
+    // TODO figure out who is right about tacos and who is Emma
+    /*
+    "tacoVotes": [
+      {
+        "isTacoBell": false,
+        "tacoId": 0,
+        "tastinessScore": 4
+      },
+      //...
+    ]
+    */
+    const scores = votes.reduce(
+      (acc, val) => {
+        // do stuff
+        if (val.tastinessScore > 5) {
+          return acc;
+        }
+
+        if (val.isTacoBell) {
+          acc.tacoBell += val.tastinessScore;
+        } else {
+          acc.notTacoBell += parseInt(val.tastinessScore);
+        }
+
+        return acc;
+      },
+      { tacoBell: 0, notTacoBell: 0 },
+    );
+
+    console.log(votes.length);
+
+    setScores(scores);
+  }, [result]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -89,6 +142,7 @@ function App() {
   }
 
   const taco = tacos[activeTaco];
+  const isAbsolutelyNotFood = scores.notTacoBell > scores.tacoBell;
 
   return (
     <div className="App">
@@ -101,8 +155,20 @@ function App() {
             <h2>
               <marquee>Thank you for voting!</marquee>
             </h2>
-            <p>Emma and Jason will return in...</p>
-            <h3>Tacos and Graphs, the Final Showdown</h3>
+            <p>The people have spoken, and they beleive that Taco Bell is...</p>
+            <h3>{isAbsolutelyNotFood && 'NOT'} FOOD</h3>
+            {isAbsolutelyNotFood ? (
+              <p>
+                Sorry Emma but your taste is terrible. The entire city of Austin
+                has banned you from returning.
+              </p>
+            ) : (
+              <p>
+                Jason is a snobby hipster and needs to get off his judgy taco
+                high horse. Jason and separately his beard have been banned from
+                all craft breweries in Austin.
+              </p>
+            )}
           </div>
         ) : (
           <div className="current-vote">
