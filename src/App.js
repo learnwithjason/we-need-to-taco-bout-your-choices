@@ -152,9 +152,7 @@ function App() {
       <main>
         {isDone ? (
           <div className="results">
-            <h2>
-              <marquee>Thank you for voting!</marquee>
-            </h2>
+            <h2>Thank you for voting!</h2>
             <p>The people have spoken, and they beleive that Taco Bell is...</p>
             <h3>{isAbsolutelyNotFood && 'NOT'} FOOD</h3>
             {isAbsolutelyNotFood ? (
